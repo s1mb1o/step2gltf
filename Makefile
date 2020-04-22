@@ -1,11 +1,17 @@
+STATIC ?= 0
+
 UNAME := $(shell uname -a)
 OCCTINCLUDE := $(shell if test -d /usr/local/include/opencascade; then echo "/usr/local/include/opencascade"; else echo ""; fi)
 
+ifneq ($(STATIC),1)
 OCCLIBS= \
 -lTKXCAF -lTKXDESTEP -lTKCDF -lTKRWMesh \
 -lTKBRep -lTKG2d -lTKG3d -lTKGeomBase \
 -lTKMath -lTKMesh -lTKSTEP -lTKSTEP209 \
--lTKSTEPAttr -lTKSTEPBase -lTKSTL -lTKXSBase -lTKernel \
+-lTKSTEPAttr -lTKSTEPBase -lTKSTL -lTKXSBase -lTKernel
+else
+OCCLIBS = $(wildcard /usr/local/lib/libTK*.a)
+endif
 
 ifeq "$(OCCTINCLUDE)" ""
 
@@ -21,10 +27,15 @@ LDFLAGS += -L$(OPENCASCADELIB) -L/usr/lib ${OCCLIBS}
 else
 
 CXXFLAGS += -I/usr/local/include/opencascade -I/usr/include
-LDFLAGS += -L/usr/local/lib -L/usr/lib ${OCCLIBS}
-
+LDFLAGS += -L/usr/local/lib -L/usr/lib
 endif
 
+ifneq ($(STATIC),1)
+LDFLAGS += $(OCCLIBS)
+else
+LDFLAGS += -Wl,--start-group -Wl,-Bstatic $(OCCLIBS) -Wl,--end-group
+LDFLAGS += -lfontconfig -lfreetype -lexpatw -lpng -lz -Wl,-Bdynamic  -lpthread -ldl
+endif
 
 ifeq (Darwin,$(findstring Darwin,$(UNAME)))
 CXX=clang++ -std=c++11 -stdlib=libc++
@@ -88,7 +99,7 @@ release:$(EXE)
 profile:$(EXE)
 
 $(EXE): $(OBJS)
-	$(CXX) $(LDFLAGS) -o $@ $(OBJS)
+	$(CXX) $(OBJS) $(LDFLAGS) -o $@
 
 #This is the rule for creating the dependency files
 deps/%.d: %.cpp
@@ -97,14 +108,21 @@ deps/%.d: %.cpp
 #This rule does the compilation
 obj/%.o: %.cpp %.d %.h
 	@$(MKDIR) $(dir $@)
-	$(CXX) $(CXXFLAGS) -o $@ -c $<
+	$(CXX) --static $(CXXFLAGS) -o $@ -c $<
 
 # make clean && svn update
 clean:
 	bash -c 'rm -f *.o $(OBJS) $(EXE)'
 
+OCCLIBS_DIR = /usr/local/lib
+OCCLIBS_FILES = $(patsubst -l%,lib%.so,$(OCCLIBS))
+
 install:
-	install -m 0755 $(EXE) /usr/local/bin/$(EXE)
+	install -Dp -m 0755 $(EXE) $(DESTDIR)/usr/bin/$(EXE)
 
 uninstall:
-	rm -f /usr/local/bin/$(EXE)
+	rm -f $(DESTDIR)/usr/bin/$(EXE)
+
+# make debian package
+debian-package:
+	dpkg-buildpackage -b -rfakeroot -us -uc

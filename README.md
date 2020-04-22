@@ -49,6 +49,18 @@ cmake .. -DUSE_RAPIDJSON:BOOL=ON
 sudo make install
 ```
 
+To compile **static** from source (on OSX make sure to use gcc, not clang):
+```
+git clone https://git.dev.opencascade.org/repos/occt.git
+cd occt
+git checkout 1e1b83c07b17144447e9e8b104ad0682655310db
+mkdir build
+cd build
+cmake .. -DUSE_RAPIDJSON:BOOL=ON -DBUILD_LIBRARY_TYPE:String=Static
+sudo make install
+```
+
+
 ### Compiling step2gltf
 
 To compile from source on OSX:
