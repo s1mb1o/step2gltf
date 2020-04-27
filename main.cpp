@@ -172,20 +172,22 @@ static void show_usage(const char* app)
     std::cerr << "    stl2gltf [OPTIONS] IN_STEP_FILE OUT_GLTF_FILE" << std::endl;
     std::cerr << std::endl;
     std::cerr << "Options:" << std::endl;
-    std::cerr << "    --linear=FLOAT      Linear deflection (default: " << DefaultLinDeflection << ")" << std::endl;
-    std::cerr << "    --angulat=FLOAT     Angular deflection (default: " << DefaultAngDeflection << ")" << std::endl;
+    std::cerr << "    " << kLinearDeflection << "=FLOAT      Linear deflection (default: " << DefaultLinDeflection << ")" << std::endl;
+    std::cerr << "    " << kAngularDeflection << "=FLOAT     Angular deflection (default: " << DefaultAngDeflection << ")" << std::endl;
     std::cerr << "    -v                  Verbose output" << std::endl;
     std::cerr << "    -h, --help          Display help" << std::endl;
+    std::cerr << std::endl;
+    std::cerr << "Linear deflection affects final file size." << std::endl;
     std::cerr << std::endl;
     std::cerr << "IN_STEP_FILE is input file in STEP format." << std::endl;
     std::cerr << std::endl;
     std::cerr << "OUT_GLTF_FILE is output file in glTF 2.0 format." << std::endl;
     std::cerr << "File extension defines glTF 2.0 variant:" << std::endl;
-    std::cerr << "    \".gltf\" - glTF with base64 binary resourses embedded in JSON" << std::endl;
+    std::cerr << "    \".gltf\" - glTF file and bin file with resourses" << std::endl;
     std::cerr << "    \".glb\"  - binary glTF." << std::endl;
     std::cerr << std::endl;
     std::cerr << "Example usage:" << std::endl;
-    std::cerr << "  # Create binary glTF from STEP file" << std::endl;
+    std::cerr << "  # Create glTF from STEP file" << std::endl;
     std::cerr << "  step2gltf samples/piggy.step piggy.gltf" << std::endl;
     std::cerr << std::endl;
 }
