@@ -102,7 +102,11 @@ static int step2stl(char *in, char *out)
 
     // Loading STEP file
     STEPCAFControl_Reader stepReader;
-    stepReader.ReadFile((Standard_CString)in);
+    if (IFSelect_RetDone != stepReader.ReadFile((Standard_CString)in)) {
+        std::cerr << "Error: Failed to read STEP file \"" << in << "\" !" << std::endl;
+        doc->Close();
+        return 1;
+    }
     stepReader.SetColorMode(true);
     stepReader.SetNameMode(true);
     stepReader.SetLayerMode(true);
