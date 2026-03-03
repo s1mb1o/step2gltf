@@ -1,5 +1,6 @@
 # step2gltf
-Example program of how to convert ISO 10303 STEP files (AP203 and AP 214) to GLTF 2.0 using OpenCascade.
+
+CLI tool to convert ISO 10303 STEP (AP203/AP214) files to glTF 2.0 using OpenCascade
 
 ## Dependencies
 
