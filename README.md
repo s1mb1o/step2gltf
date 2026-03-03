@@ -2,17 +2,25 @@
 
 CLI tool to convert ISO 10303 STEP (AP203/AP214) files to glTF 2.0 using OpenCascade
 
+![AP214 STEP assembly converted to glTF](samples/step_preview.png)
+
 ## Dependencies
 
-You need OpenCascade 7.4.1.dev with RapidJSON.
+You need OpenCascade 7.5+ with RapidJSON.
 
 ## Compiling
 
-### Prepare on Astra Linux
+### Prepare on Debian/Ubuntu
 
+Using system packages (Ubuntu 22.04+ ships OpenCascade 7.5+):
+```
+sudo apt-get install libocct-data-exchange-dev libocct-draw-dev rapidjson-dev
+```
+
+Or install build dependencies for compiling OpenCascade from source:
 ```
 sudo apt-get install ca-certificates \
-    libcurl3 libuv1 cmake \
+    libcurl4 libuv1 cmake \
     libfreetype6-dev \
     tcl-dev tk-dev \
     libxmu-dev libxi-dev
@@ -35,15 +43,14 @@ sudo make install
 
 ### Compiling OpenCascade from source:
 
-Required latest OpenCascade sources, otherwise there will be
-no RWGltf_CafWriter class.
+Requires OpenCascade 7.5+ (for `RWGltf_CafWriter` and `Message_ProgressRange` API).
 
 To compile from source (on OSX make sure to use gcc, not clang):
 
 ```
-git clone https://git.dev.opencascade.org/repos/occt.git
-cd occt
-git checkout 1e1b83c07b17144447e9e8b104ad0682655310db
+git clone https://github.com/Open-Cascade-SAS/OCCT.git
+cd OCCT
+git checkout V7_9_3
 mkdir build
 cd build
 cmake .. -DUSE_RAPIDJSON:BOOL=ON
@@ -52,9 +59,9 @@ sudo make install
 
 To compile **static** from source (on OSX make sure to use gcc, not clang):
 ```
-git clone https://git.dev.opencascade.org/repos/occt.git
-cd occt
-git checkout 1e1b83c07b17144447e9e8b104ad0682655310db
+git clone https://github.com/Open-Cascade-SAS/OCCT.git
+cd OCCT
+git checkout V7_9_3
 mkdir build
 cd build
 cmake .. -DUSE_RAPIDJSON:BOOL=ON -DBUILD_LIBRARY_TYPE:String=Static
@@ -79,10 +86,10 @@ step2gltf STEPFILENAME GLTFFILENAME
 ```
 
 File extension defines glTF 2.0 variant:
- - ".gltf" - glTF with base64 binary resourses embedded in JSON.
+ - ".gltf" - glTF JSON with a separate .bin file for binary resources.
  - ".glb"  - binary glTF.
 
-You may also need to specify LD_LIBRARY_PATH to run on Astra Linux
+You may also need to specify LD_LIBRARY_PATH when OpenCascade is installed to /usr/local
 ```
 LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH step2gltf STEPFILENAME GLTFFILENAME
 ```
