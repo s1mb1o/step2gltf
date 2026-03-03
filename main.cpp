@@ -1,7 +1,6 @@
 #include <iostream>
 #include <XCAFApp_Application.hxx>
 #include <TDocStd_Document.hxx>
-#include <Message_ProgressIndicator.hxx>
 // STEP Read methods
 #include <STEPCAFControl_Reader.hxx>
 // Meshing
@@ -9,6 +8,7 @@
 #include <BRepMesh_IncrementalMesh.hxx>
 // GLTF Write methods
 #include <RWGltf_CafWriter.hxx>
+#include <Message_ProgressRange.hxx>
 
 
 /// @name Defines
@@ -43,37 +43,8 @@ static const char* kVerbose             = "-v";
 static const char* errorInvalidOutExtension = "output filename shall have .glTF or .glb extension.";
 /// @}
 
-/// Prints progress to stdout
-class ProgressIndicator : public Message_ProgressIndicator
-{
-public:
-    Standard_Boolean Show(const Standard_Boolean /*force*/) override
-    {
-        const Standard_Real pc = this->GetPosition(); // Always within [0,1]
-        const int val = static_cast<int>(1 + pc * (100 - 1));
-        if (val > m_val) {
-            std::cout << '\r' << val;
-            if (val < 100)
-                std::cout << "-";
-            else
-                std::cout << "%" << std::endl;
-            std::cout.flush();
-            m_val = val;
-        }
-        return Standard_True;
-    }
-
-    Standard_Boolean UserBreak() override
-    {
-        return Standard_False;
-    }
-
-private:
-    int m_val = 0;
-};
-
 /// Transcode STEP to glTF
-static int step2stl(char *in, char *out)
+static int step2gltf(char *in, char *out)
 {
     Standard_Boolean gltfIsBinary = Standard_False;
 
@@ -153,9 +124,7 @@ static int step2stl(char *in, char *out)
     // SetTransformationFormat (RWGltf_WriterTrsfFormat theFormat)
     // https://dev.opencascade.org/doc/refman/html/_r_w_gltf___writer_trsf_format_8hxx.html#a24e114d176d2b2254deac8f1b3e95bf7
 
-    ProgressIndicator* progress = nullptr;
-
-    if (!cafWriter.Perform(doc, theFileInfo, progress)) {
+    if (!cafWriter.Perform(doc, theFileInfo, Message_ProgressRange())) {
         std::cerr << "Error: Failed to write " << (gltfIsBinary ? "binary " : "") << "glTF to file !" << std::endl;
         return 1;
     }
@@ -166,10 +135,10 @@ static int step2stl(char *in, char *out)
 
 static void show_usage(const char* app)
 {
-    std::cerr << "stl2gltf - A tool to convert STEP to glTF with OpenCascade" << std::endl;
+    std::cerr << "step2gltf - A tool to convert STEP to glTF with OpenCascade" << std::endl;
     std::cerr << std::endl;
     std::cerr << "Usage:" << std::endl;
-    std::cerr << "    stl2gltf [OPTIONS] IN_STEP_FILE OUT_GLTF_FILE" << std::endl;
+    std::cerr << "    step2gltf [OPTIONS] IN_STEP_FILE OUT_GLTF_FILE" << std::endl;
     std::cerr << std::endl;
     std::cerr << "Options:" << std::endl;
     std::cerr << "    " << kLinearDeflection << "=FLOAT      Linear deflection (default: " << DefaultLinDeflection << ")" << std::endl;
@@ -251,5 +220,5 @@ Standard_Integer main (int argc, char *argv[])
         return 1;
     }
 
-    return step2stl(argv[argc-2], argv[argc-1]);
+    return step2gltf(argv[argc-2], argv[argc-1]);
 }
